@@ -1,7 +1,11 @@
+import pool.PoolManager;
+import threading.ClientRunnable;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 
 public class BDPMServer implements Runnable {
     private PrintWriter sortieWriter;
@@ -13,11 +17,12 @@ public class BDPMServer implements Runnable {
     // Réponse à renvoyer au client
     private Object objectToSendBack = null;
 
-    private int maxClientConnection;
     private int serverPort;
 
-    public BDPMServer(int port, int max_client) throws IOException {
-        maxClientConnection = max_client;
+    private PoolManager manager;
+
+    public BDPMServer(int port, int max_client) throws SQLException {
+        manager = new PoolManager(max_client);
         serverPort = port;
     }
 
@@ -43,7 +48,7 @@ public class BDPMServer implements Runnable {
                         "[!] Error accepting client connection", e);
             }
 
-            new Thread(new ClientRunnable(clientSocket)).start();
+            new Thread(new ClientRunnable(clientSocket, manager)).start();
         }
         System.out.println("[*] Server Stopped.");
     }
