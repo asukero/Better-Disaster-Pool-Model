@@ -1,6 +1,7 @@
 package view;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
@@ -12,9 +13,10 @@ public class LogPanel extends JPanel implements Consumer {
 
     public LogPanel() {
         setLayout(new BorderLayout());
-        setBorder(new EmptyBorder(0, 0, 0, 10));
+        setBorder(new CompoundBorder(new EmptyBorder(0, 10, 0, 10), BorderFactory.createTitledBorder("Log")));
         textArea = new JTextArea(6,2);
         add(new JScrollPane(textArea),BorderLayout.CENTER);
+
     }
 
     @Override
