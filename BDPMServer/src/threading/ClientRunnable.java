@@ -1,20 +1,22 @@
 package threading;
 
 import pool.PoolManager;
+import serializable.Message;
+import serializable.MessageType;
 
+import javax.net.ssl.SSLSocket;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
 
 /**
 
  */
 public class ClientRunnable implements Runnable {
 
-    protected Socket clientSocket = null;
+    protected SSLSocket clientSocket = null;
     private PoolManager manager;
 
-    public ClientRunnable(Socket clientSocket, PoolManager manager) {
+    public ClientRunnable(SSLSocket clientSocket, PoolManager manager) {
         this.clientSocket = clientSocket;
         this.manager = manager;
     }
@@ -22,36 +24,26 @@ public class ClientRunnable implements Runnable {
     public void run() {
         boolean toClose = false;
         try {
-            ObjectInputStream inFromClient = new ObjectInputStream(clientSocket.getInputStream());
+            clientSocket.setEnabledCipherSuites(clientSocket.getSupportedCipherSuites());
+
+
             ObjectOutputStream outToClient = new ObjectOutputStream(clientSocket.getOutputStream());
+            ObjectInputStream inFromClient = new ObjectInputStream(clientSocket.getInputStream());
 
             while (!toClose) {
 
                 //récupération de la commande du client
                 Object clientObject = inFromClient.readObject();
-
-                String message = (String) clientObject;
                 Object objectToSendBack = null;
 
+                if (clientObject instanceof Message) {
+                    Message message = (Message) clientObject;
+                    objectToSendBack = manager.processMessage(message);
 
-                switch (message) {
-                    case "CONNECT":
-                        System.out.println("[*] A client is connected");
-                        objectToSendBack = "[>] Connection was a success!";
-                        break;
-                    case "DISCONNECT":
-                        System.out.println("[*] A client wants to be deconnected");
-                        objectToSendBack = "[>] Deconnection was a success!";
+                    if(message.getMessageType() == MessageType.DISCONNECT){
                         toClose = true;
-                        break;
-                    case "HELP":
-                        System.out.println("[*] A client need help!");
-                        objectToSendBack = "[>] Requested help was a success!";
-                        break;
-                    default:
-                        break;
+                    }
                 }
-
 
                 //envoi d'une réponse au client
                 if (objectToSendBack != null) {
@@ -59,7 +51,6 @@ public class ClientRunnable implements Runnable {
                 } else {
                     outToClient.writeObject("[!] Server returned nothing");
                 }
-
 
 
                 if (toClose) {

@@ -1,5 +1,7 @@
 package view;
 
+import view.utils.IPAddressFormatter;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.NumberFormatter;
@@ -13,6 +15,7 @@ public class MainFrame extends JFrame {
     private JButton connectButton = new JButton("Connect");
     private JButton disconnectButton = new JButton("Disconnect");
     private JButton helpButton = new JButton("Help");
+    private JButton registerButton = new JButton("Register");
     private JFormattedTextField portField;
 
 
@@ -22,8 +25,8 @@ public class MainFrame extends JFrame {
         setSize(600, 600);
         setLayout(new BorderLayout(0, 0));
 
-        JPanel mainPanel = new JPanel(new GridLayout(4, 1, 5, 5));
-        mainPanel.setBorder(new EmptyBorder(100, 10, 100, 10));
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(new EmptyBorder(50, 10, 50, 10));
 
         JPanel serverPanel = new JPanel(new GridLayout(2, 1));
 
@@ -51,22 +54,31 @@ public class MainFrame extends JFrame {
         serverPanel.add(ipPanel);
         serverPanel.add(portPanel);
 
-        JPanel buttonsPanel = new JPanel(new FlowLayout());
 
+        JPanel buttonsPanel = new JPanel(new FlowLayout());
         buttonsPanel.add(connectButton);
         buttonsPanel.add(disconnectButton);
 
+        JPanel registerPanel = new JPanel(new FlowLayout());
+        registerPanel.add(registerButton);
+
+
         JPanel logPanel = new JPanel(new BorderLayout(5, 5));
         initLogger(logPanel);
+        JPanel northPanel = new JPanel(new GridLayout(3, 1, 5, 5));
+        northPanel.add(serverPanel);
+        northPanel.add(buttonsPanel);
+        northPanel.add(registerPanel);
 
-        mainPanel.add(serverPanel);
-        mainPanel.add(buttonsPanel);
-        mainPanel.add(logPanel);
+        mainPanel.add(northPanel, BorderLayout.NORTH);
+        mainPanel.add(logPanel, BorderLayout.CENTER);
+
         JPanel controlPanel = new JPanel(new FlowLayout());
         controlPanel.add(helpButton);
-        mainPanel.add(controlPanel);
-        add(mainPanel);
 
+        mainPanel.add(controlPanel, BorderLayout.PAGE_END);
+
+        add(mainPanel);
         setVisible(true);
 
     }
@@ -99,5 +111,9 @@ public class MainFrame extends JFrame {
 
     public JFormattedTextField getPortField() {
         return portField;
+    }
+
+    public JButton getRegisterButton() {
+        return registerButton;
     }
 }

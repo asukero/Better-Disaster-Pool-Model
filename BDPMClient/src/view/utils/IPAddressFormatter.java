@@ -1,11 +1,11 @@
-package view;
+package view.utils;
 
 
 import javax.swing.text.DefaultFormatter;
 import java.text.ParseException;
 import java.util.StringTokenizer;
 
-class IPAddressFormatter extends DefaultFormatter
+public class IPAddressFormatter extends DefaultFormatter
 {
     public String valueToString(Object value) throws ParseException
     {

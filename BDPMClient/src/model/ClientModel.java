@@ -1,16 +1,20 @@
 package model;
 
+import serializable.Message;
+import serializable.MessageType;
+
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
-import java.net.Socket;
 
 public class ClientModel {
 
     private InetAddress serverHostName;
     private int portNumber;
-    private Socket clientSocket;
+    private SSLSocket clientSocket;
     private ObjectOutputStream outToServer;
     private ObjectInputStream inFromServer;
     boolean initialized = false;
@@ -25,7 +29,8 @@ public class ClientModel {
     public void connectToServer() {
         try {
             System.out.println("[*] Connecting to " + serverHostName.toString() + ":" + portNumber + "...");
-            clientSocket = new Socket(serverHostName, portNumber);
+            SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+            clientSocket = (SSLSocket) sslsocketfactory.createSocket(serverHostName, portNumber);
             clientSocket.setKeepAlive(true);
 
             outToServer = new ObjectOutputStream(clientSocket.getOutputStream());
@@ -35,21 +40,20 @@ public class ClientModel {
         }
     }
 
-    public void sendToServer(Object objectToSend) {
-        Object response;
+    public void sendToServer(Object objectToSend, MessageType messageType) {
+        clientSocket.setEnabledCipherSuites(clientSocket.getSupportedCipherSuites());
         try {
-            //Ouverture des flux d'entrée et de sortie du socket
-
+            Message message = new Message(messageType, objectToSend, InetAddress.getLocalHost().getHostName(), InetAddress.getLocalHost());
             //envoi de l'objet Commande serialisé
-            outToServer.writeObject(objectToSend);
+            outToServer.writeObject(message);
 
             //Objet réponse du serveur
-            response = inFromServer.readObject();
+            Object response = inFromServer.readObject();
             System.out.println(response.toString());
 
 
         } catch (IOException | ClassNotFoundException ex) {
-            System.out.println("[!] Error connection was lost: " + ex.getMessage());
+            System.out.println("[!] Error sending message failed: " + ex.getMessage());
         }
     }
 
