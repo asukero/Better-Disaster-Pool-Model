@@ -12,6 +12,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 
+/**
+ * Contrôleur de la fenêtre d'enregistrement
+ */
 public class RFController extends MouseAdapter implements DocumentListener {
 
     private ClientModel model;
@@ -25,6 +28,7 @@ public class RFController extends MouseAdapter implements DocumentListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
+        //Gestion des boutons
         if (e.getSource() instanceof JButton) {
             JButton button = (JButton) e.getSource();
             Component frame = SwingUtilities.getRoot(button);
@@ -71,6 +75,7 @@ public class RFController extends MouseAdapter implements DocumentListener {
 
     @Override
     public void changedUpdate(DocumentEvent e) {
+        //gestion des textfields
         try {
             String documentName = (String) e.getDocument().getProperty("parent");
             switch (documentName) {

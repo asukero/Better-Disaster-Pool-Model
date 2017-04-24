@@ -13,7 +13,8 @@ import java.io.ObjectOutputStream;
 import java.sql.SQLException;
 
 /**
-
+    Runnable permettant de traiter les messages provenant du client. Recupère les messages entrants avec
+ l'ObjectOuputStream puis transmet le message au ClientManager qui va se charger de traiter la demande du client
  */
 public class ClientRunnable implements Runnable {
 
@@ -29,6 +30,10 @@ public class ClientRunnable implements Runnable {
 
     }
 
+    /**
+     * initialise les entrées/sorties des flux d'objets et lis en continu ce qui arrive dans inFromClient tant que le
+     * client n'a pas fermé la connexion.
+     */
     public void run() {
         toClose = false;
         try {
@@ -40,7 +45,7 @@ public class ClientRunnable implements Runnable {
 
             while (!toClose) {
 
-                //récupération de la commande du client
+                //récupération du message du client
                 Object clientObject = inFromClient.readObject();
                 Object objectToSendBack = null;
 
@@ -74,6 +79,11 @@ public class ClientRunnable implements Runnable {
         }
     }
 
+    /**
+     * méthode spécifique appelée par un ClientManager qui permet d'envoyer directement un message au client attaché à
+     * ce Runnable.
+     * @param message
+     */
     public void sendHelpToClient(Message message){
         if(!toClose){
             try{

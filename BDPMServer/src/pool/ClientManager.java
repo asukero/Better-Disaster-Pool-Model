@@ -17,6 +17,11 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.NoSuchElementException;
 
+/**
+ * Principale classe s'occupant de la gestion des messages reçus par un ClientRunnable
+ * Cette classe lit les message fournit pour les client puis effectue les tâches demandées par le client
+ * Dispose d'une connexion à la BDD pour l'authentification/inscription/connexion des utilisateurs
+ */
 public class ClientManager {
     private final static StorageEngine engine = new StorageEngine();
     private UsersStore usersStore;
@@ -30,6 +35,7 @@ public class ClientManager {
     private boolean loggedIn = false;
 
     public ClientManager() throws SQLException {
+        //initialisation des Stores pour effecter des requêtes groupées à la BDD.
         engine.connect();
         usersStore = new UsersStore(engine);
         devicesStore = new DevicesStore(engine);
@@ -37,6 +43,11 @@ public class ClientManager {
         engine.disconnect();
     }
 
+    /**
+     * Traite les message clients reçus
+     * @param message
+     * @return
+     */
     public ReturnMessage processMessage(Message message) {
         try {
             switch (message.getMessageType()) {
@@ -111,6 +122,12 @@ public class ClientManager {
         }
     }
 
+    /**
+     * Enregistrement d'un nouvel utilisateur dans la BDD
+     * @param credentials
+     * @return
+     * @throws SQLException
+     */
     private boolean registerNewUser(Credentials credentials) throws SQLException {
         String fHash = Hashing.sha256().hashString(credentials.getPassword(), StandardCharsets.UTF_8).toString();
         String hash = Hashing.sha256().hashString(fHash + salt, StandardCharsets.UTF_8).toString();
@@ -123,6 +140,11 @@ public class ClientManager {
         return true;
     }
 
+    /**
+     * Connexion d'un utilisateur. (La deconnexion s'effectue simplement en fermant le socket)
+     * @param credentials
+     * @throws SQLException
+     */
     private void loginUser(Credentials credentials) throws SQLException {
         String fHash = Hashing.sha256().hashString(credentials.getPassword(), StandardCharsets.UTF_8).toString();
         String hash = Hashing.sha256().hashString(fHash + salt, StandardCharsets.UTF_8).toString();
@@ -133,23 +155,25 @@ public class ClientManager {
         loggedIn = user.getHash().equals(hash);
     }
 
-    private void logoffUser() {
 
-    }
-
+    /**
+     * Enregistre un nouveau device dans la BDD
+     * @param message
+     */
     private void registerNewDevice(Message message) {
         try {
             engine.connect();
-            DevicesEntity devicesEntity = devicesStore.getByName(message.getSenderName());
+            device = devicesStore.getByName(message.getSenderName());
             engine.disconnect();
         } catch (SQLException ex) {
             System.out.println("[*] No device found for client " + user.getNickName() + ":" + message.getSenderIp().toString() + ", adding a new one");
             try {
                 device = new DevicesEntity(engine);
                 device.setDeviceName(message.getSenderName());
-                device.setIp(message.getSenderIp().toString());
+                device.setIp(message.getSenderIp().getHostAddress());
                 device.setUser(user);
                 device.save();
+                engine.disconnect();
             } catch (SQLException e) {
                 System.out.println("[!] Error while registering new device for client " + user.getNickName() + ":" + message.getSenderIp().toString() + ".");
             }
@@ -157,9 +181,15 @@ public class ClientManager {
         }
     }
 
+    /**
+     * Traitement de la demande d'aide du client, recupère dans le PoolManager une connexion cliente s'étant déclarée
+     * comme pouvant recevoir de l'aide puis cette demande d'aide à cette connexion cliente.
+     * @param message
+     */
     private void requestHelp(Message message) {
         try {
             ClientRunnable helperClient = PoolManager.getInstance().getHelperClient();
+            //éviter que le demandeur d'aide soit celui choisit pour recevoir l'aide!
             if (helperClient.getManager() != this) {
                 helperClient.sendHelpToClient(new Message(MessageType.HELP, "Help request received from " + user.getNickName() + ":" + message.getSenderIp().toString()));
                 helperClient.getManager().canHelp = false;

@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-/*
-    StreamLoggger for the LogPanel. Redirects STDOUT to LogPanel.
+/**
+ *  StreamLoggger for the LogPanel. Redirects STDOUT to LogPanel.
  */
 public class StreamLogger extends OutputStream {
     private StringBuilder buffer;

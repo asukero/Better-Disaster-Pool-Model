@@ -12,6 +12,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.InetAddress;
 
+/**
+ * Contrôleur de la fenêtre principale
+ */
 public class MFController extends MouseAdapter implements DocumentListener {
 
     private ClientModel model;
@@ -26,6 +29,7 @@ public class MFController extends MouseAdapter implements DocumentListener {
     public void mousePressed(MouseEvent e) {
         if (e.getSource() instanceof JButton) {
             JButton button = (JButton) e.getSource();
+            //Gestion des boutons
             switch (button.getText()) {
                 case "Connect":
                     try {
@@ -147,6 +151,7 @@ public class MFController extends MouseAdapter implements DocumentListener {
 
     @Override
     public void changedUpdate(DocumentEvent e) {
+        //gestion des textfields
         try {
             if (e.getDocument().getProperty("parent") == "ip") {
                 ipAddress = e.getDocument().getText(0, e.getDocument().getLength());

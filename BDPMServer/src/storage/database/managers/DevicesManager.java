@@ -19,7 +19,7 @@ public class DevicesManager extends Manager<DevicesEntry> {
         String query = "CREATE TABLE IF NOT EXISTS Devices(" +
                 "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE," +
                 "deviceName TEXT NOT NULL, " +
-                "ip TEXT NOT NULL UNIQUE," +
+                "ip TEXT NOT NULL," +
                 "user INTEGER NOT NULL REFERENCES Users(id));";
 
         Statement st = getConnection().createStatement();

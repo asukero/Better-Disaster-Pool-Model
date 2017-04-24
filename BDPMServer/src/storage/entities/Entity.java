@@ -6,6 +6,11 @@ import storage.database.managers.Manager;
 
 import java.sql.SQLException;
 
+/**
+ * Entrée pour la BDD permet la création/suppression de nouvelles entités dans la BDD, une classe enfant par table
+ * @param <M>
+ * @param <E>
+ */
 public abstract class Entity<M extends Manager, E extends Entry> {
     private StorageEngine engine;
     private M manager;

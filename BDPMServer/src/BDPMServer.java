@@ -7,6 +7,10 @@ import javax.net.ssl.SSLSocket;
 import java.io.IOException;
 import java.sql.SQLException;
 
+/**
+ * Application serveur multi-threading, permet d'intéragir avec plusieurs clients à la fois en utilisant des connexions
+ * chiffrées SSL
+ */
 public class BDPMServer implements Runnable {
     private SSLServerSocket serverSocket;
 
@@ -16,13 +20,15 @@ public class BDPMServer implements Runnable {
 
     private int serverPort;
 
-    private PoolManager manager;
-
     public BDPMServer(int port, int max_client) throws SQLException {
         PoolManager.getInstance().init(max_client);
         serverPort = port;
     }
 
+    /**
+     * Ouverture du Socket SSL puis le serveur attend d'accepter des demandes de connexion provenant de clients.
+     * Pour chaque nouveau client se connectant, un thread relié au socket client est créée.
+     */
     @Override
     public void run() {
         synchronized (this) {
@@ -60,6 +66,9 @@ public class BDPMServer implements Runnable {
         return this.isStopped;
     }
 
+    /**
+     * Interruption de la connexion
+     */
     public synchronized void stop() {
         this.isStopped = true;
         try {
@@ -69,6 +78,9 @@ public class BDPMServer implements Runnable {
         }
     }
 
+    /**
+     * Ouverture du Socket SSL, le serveur écoute sur le port indiqué par l'utilisateur en @param du programme
+     */
     private void openServerSocket() {
         try {
             SSLServerSocketFactory sslserversocketfactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
@@ -80,6 +92,7 @@ public class BDPMServer implements Runnable {
 
     public static void main(String[] args) {
 
+        //lecture des arguments
         try {
             if (args.length != 4) {
                 throw new IllegalArgumentException("[*] Please enter 4 arguments");
@@ -91,6 +104,7 @@ public class BDPMServer implements Runnable {
                 System.out.println("[*] Starting server...");
                 new Thread(server).start();
 
+                //interruption de la connexion lorsque l'utilisateur veut fermer le programme
                 Runtime.getRuntime().addShutdownHook(new Thread() {
                     @Override
                     public void run() {

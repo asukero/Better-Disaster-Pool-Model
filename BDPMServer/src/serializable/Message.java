@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+/**
+ * Classe permettant d'envoyer des informations entre le client et le serveur
+ */
 public class Message implements Serializable {
     private MessageType messageType;
     private Object content;

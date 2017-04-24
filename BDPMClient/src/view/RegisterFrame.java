@@ -7,6 +7,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.text.AbstractDocument;
 import java.awt.*;
 
+/**
+ * fenêtre pour l'inscription d'un nouvel utilisateur
+ */
 public class RegisterFrame extends JFrame {
     static final String TITLE = "Register";
 

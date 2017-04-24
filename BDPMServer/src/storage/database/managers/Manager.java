@@ -9,6 +9,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+/**
+ * Manager realise les requêtes SQL pour recupérer des informations de la BBD ou ajouter/supprimer des lignes.
+ * 1 Manager par table
+ * @param <E>
+ */
 public abstract class Manager<E extends Entry> {
     private StorageEngine engine;
 

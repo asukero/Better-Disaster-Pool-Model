@@ -7,6 +7,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.text.AbstractDocument;
 import java.awt.*;
 
+/**
+ * fenêtre pour le login, permet à l'utilisateur d'entrer ses identifiants
+ */
 public class LoginFrame extends JFrame {
     static final String TITLE = "Login";
 

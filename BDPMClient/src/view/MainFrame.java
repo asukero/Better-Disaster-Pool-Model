@@ -8,6 +8,9 @@ import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.io.PrintStream;
 
+/**
+ * fenêtre principale du client
+ */
 public class MainFrame extends JFrame {
     static final String TITLE = "BDPM Client";
 
@@ -87,6 +90,10 @@ public class MainFrame extends JFrame {
 
     }
 
+    /**
+     * initialisation du logger qui est stocké dans le panel indiqué en @param
+     * @param bottomPanel
+     */
     private void initLogger(JPanel bottomPanel) {
         EventQueue.invokeLater(() -> {
             LogPanel logPanel = new LogPanel();

@@ -4,6 +4,9 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
+/**
+ * Documentfilter pour n'entrer que des caractères alpha numériques dans une Jtextfield
+ */
 public class UserInputFilter extends DocumentFilter {
 
     @Override

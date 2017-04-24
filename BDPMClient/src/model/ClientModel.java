@@ -11,6 +11,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 
+/**
+ * Logique interne de l'application cliente, réalise tous les appels vers le serveur
+ * Une fois la connexion SSL établie, le cient peut envoyer à n'importe quel moment des objets Message vers le serveur.
+ * Le socket reste ouvert tant que l'utilisateur ne se déconnecte pas.
+ * */
 public class ClientModel {
 
     private InetAddress serverHostName;
@@ -29,6 +34,9 @@ public class ClientModel {
         connectToServer();
     }
 
+    /**
+     * Initialise le SSLSocket pour débuter la connexion
+     */
     public void connectToServer() {
         try {
             System.out.println("[*] Connecting to " + serverHostName.toString() + ":" + portNumber + "...");
@@ -43,6 +51,11 @@ public class ClientModel {
         }
     }
 
+    /**
+     * sendToServer() est appellée une fois la connexion établie pour envoyer des message au serveur.
+     * @param objectToSend
+     * @param messageType
+     */
     public void sendToServer(Object objectToSend, MessageType messageType) {
         clientSocket.setEnabledCipherSuites(clientSocket.getSupportedCipherSuites());
         try {
@@ -64,6 +77,11 @@ public class ClientModel {
         }
     }
 
+    /**
+     * Cette méthode est appellée lorsque le client se signale comme disponible pour recevoir une demande d'aide d'un
+     * autre client. Un thread est alors lancé qui attend un message du serveur correspond à la demande d'un autre
+     * client qui a transité par le serveur.
+     */
     public void waitingToHelp(){
         if(waitingToHelpThread.isAlive()){
             waitingToHelpThread.interrupt();
@@ -93,6 +111,9 @@ public class ClientModel {
 
     }
 
+    /**
+     * fermeture de le connexion en cas de deconnexion demandée par l'utilisateur
+     */
     public void closeConnection() {
         try {
             // nettoyage du flux de sortie et fermeture du socket lors que le serveur a répondu.
@@ -106,6 +127,10 @@ public class ClientModel {
         }
     }
 
+    /**
+     * méthode qui traite le message de retour envoyé par le serveur.
+     * @param rMessage
+     */
     private void processReturnMessage(ReturnMessage rMessage) {
         if (rMessage.isSuccess()) {
             System.out.println("[*] Success!");
@@ -140,6 +165,12 @@ public class ClientModel {
         }
     }
 
+    /**
+     * méthode qui traite les messages provenant du serveur reçu par le client mais qui ne sont pas des messages de
+     * réponse du serveur suite à l'envoi d'un message de ce client. (ex : une demande d'aide d'un autre client recu par
+     * ce client)
+     * @param message
+     */
     private void processNewMessage(Message message) {
         switch (message.getMessageType()) {
             case CONNECT:

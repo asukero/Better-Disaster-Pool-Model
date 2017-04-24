@@ -2,6 +2,10 @@ package serializable;
 
 import java.net.UnknownHostException;
 
+/**
+ * classe enfant de Message représentant un message de retour, généralement envoyé du serveur vers le client.
+ * Permet de déterminer si la demande du client a été correct traitée par le serveur ou non (isSuccess)
+ */
 public class ReturnMessage extends Message {
     boolean isSuccess;
 

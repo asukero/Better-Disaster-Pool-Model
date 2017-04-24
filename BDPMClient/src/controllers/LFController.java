@@ -12,6 +12,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 
+/**
+ * Contrôleur pour la fenêtre de login
+ */
 public class LFController extends MouseAdapter implements DocumentListener {
 
     private ClientModel model;

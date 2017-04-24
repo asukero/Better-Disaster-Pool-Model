@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/**
+ * Moteur permettant de se connecter/deconnecter pour faire des requêtes à la BDD
+ */
 public class StorageEngine {
     private String path;
     private Connection connection;
