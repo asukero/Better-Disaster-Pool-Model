@@ -22,6 +22,10 @@ public class UsersStore {
         return new UsersEntity(this.engine, this.manager.getEntry(id));
     }
 
+    public UsersEntity getByName(String name) throws SQLException {
+        return new UsersEntity(this.engine, this.manager.getEntry(name));
+    }
+
     public List<UsersEntity> getAll() throws SQLException {
         List<UsersEntity> result = new LinkedList<>();
         for(UsersEntry entry: this.manager.getEntries()) {

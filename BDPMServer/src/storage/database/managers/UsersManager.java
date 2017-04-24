@@ -71,6 +71,20 @@ public class UsersManager extends Manager<UsersEntry> {
         return entry;
     }
 
+    public UsersEntry getEntry(String nickName) throws SQLException {
+        String query = "SELECT id, nickName, hash FROM Users WHERE nickName = ?;";
+        PreparedStatement statement = getConnection().prepareStatement(query);
+        statement.setString(1, nickName);
+        ResultSet data = statement.executeQuery();
+        data.next();
+
+        UsersEntry entry = UsersEntry.parseResults(data);
+        data.close();
+        statement.close();
+
+        return entry;
+    }
+
     public boolean updateEntry(UsersEntry entry) throws SQLException {
         String query = "UPDATE Users SET nickName = ?, hash = ? WHERE id = ?;";
         PreparedStatement statement = getConnection().prepareStatement(query);

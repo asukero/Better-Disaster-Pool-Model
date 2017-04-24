@@ -15,7 +15,9 @@ public class MainFrame extends JFrame {
     private JButton connectButton = new JButton("Connect");
     private JButton disconnectButton = new JButton("Disconnect");
     private JButton helpButton = new JButton("Help");
+    private JButton helperButton = new JButton("Helper");
     private JButton registerButton = new JButton("Register");
+    private JButton loginButton = new JButton("Login");
     private JFormattedTextField portField;
 
 
@@ -60,6 +62,7 @@ public class MainFrame extends JFrame {
         buttonsPanel.add(disconnectButton);
 
         JPanel registerPanel = new JPanel(new FlowLayout());
+        registerPanel.add(loginButton);
         registerPanel.add(registerButton);
 
 
@@ -75,6 +78,7 @@ public class MainFrame extends JFrame {
 
         JPanel controlPanel = new JPanel(new FlowLayout());
         controlPanel.add(helpButton);
+        controlPanel.add(helperButton);
 
         mainPanel.add(controlPanel, BorderLayout.PAGE_END);
 
@@ -115,5 +119,13 @@ public class MainFrame extends JFrame {
 
     public JButton getRegisterButton() {
         return registerButton;
+    }
+
+    public JButton getLoginButton() {
+        return loginButton;
+    }
+
+    public JButton getHelperButton() {
+        return helperButton;
     }
 }

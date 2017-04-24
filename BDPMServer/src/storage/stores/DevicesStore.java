@@ -22,6 +22,10 @@ public class DevicesStore {
         return new DevicesEntity(this.engine, this.manager.getEntry(id));
     }
 
+    public DevicesEntity getByName(String name) throws SQLException {
+        return new DevicesEntity(this.engine, this.manager.getEntry(name));
+    }
+
     public List<DevicesEntity> getAll() throws SQLException {
         List<DevicesEntity> result = new LinkedList<>();
         for(DevicesEntry entry: this.manager.getEntries()) {

@@ -2,6 +2,7 @@ package model;
 
 import serializable.Message;
 import serializable.MessageType;
+import serializable.ReturnMessage;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -17,7 +18,9 @@ public class ClientModel {
     private SSLSocket clientSocket;
     private ObjectOutputStream outToServer;
     private ObjectInputStream inFromServer;
+    private Thread waitingToHelpThread = new Thread();
     boolean initialized = false;
+    boolean authenticated = false;
 
     public void initialize(InetAddress inetAddress, int port) {
         serverHostName = inetAddress;
@@ -43,18 +46,51 @@ public class ClientModel {
     public void sendToServer(Object objectToSend, MessageType messageType) {
         clientSocket.setEnabledCipherSuites(clientSocket.getSupportedCipherSuites());
         try {
-            Message message = new Message(messageType, objectToSend, InetAddress.getLocalHost().getHostName(), InetAddress.getLocalHost());
-            //envoi de l'objet Commande serialisé
+            Message message = new Message(messageType, objectToSend);
             outToServer.writeObject(message);
 
             //Objet réponse du serveur
             Object response = inFromServer.readObject();
-            System.out.println(response.toString());
-
+            if (response instanceof ReturnMessage) {
+                ReturnMessage rMessage = (ReturnMessage) response;
+                processReturnMessage(rMessage);
+            } else if (response instanceof Message) {
+                Message newMessage = (Message) response;
+                processNewMessage(newMessage);
+            }
 
         } catch (IOException | ClassNotFoundException ex) {
             System.out.println("[!] Error sending message failed: " + ex.getMessage());
         }
+    }
+
+    public void waitingToHelp(){
+        if(waitingToHelpThread.isAlive()){
+            waitingToHelpThread.interrupt();
+        } else{
+            waitingToHelpThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    boolean helpReceived = false;
+                    System.out.println("[*] Waiting to help...");
+                    try{
+                        while (!helpReceived){
+                            Object response = inFromServer.readObject();
+                            if (response instanceof Message) {
+                                Message newMessage = (Message) response;
+                                processNewMessage(newMessage);
+                                helpReceived = true;
+                            }
+                        }
+                    } catch (IOException | ClassNotFoundException ex) {
+                        System.out.println("[!] Error while waiting for help: " + ex.getMessage());
+                    }
+
+                }
+            });
+            waitingToHelpThread.start();
+        }
+
     }
 
     public void closeConnection() {
@@ -70,6 +106,63 @@ public class ClientModel {
         }
     }
 
+    private void processReturnMessage(ReturnMessage rMessage) {
+        if (rMessage.isSuccess()) {
+            System.out.println("[*] Success!");
+        } else {
+            System.out.println("[!] Error!");
+        }
+        System.out.println(rMessage.getContent().toString());
+        switch (rMessage.getMessageType()) {
+            case CONNECT:
+                break;
+            case DISCONNECT:
+                authenticated = false;
+                break;
+            case LOGIN:
+                if (rMessage.isSuccess()) {
+                    authenticated = true;
+                }
+                break;
+            case REGISTER:
+                if (rMessage.isSuccess()) {
+                    authenticated = true;
+                }
+                break;
+            case HELP:
+                break;
+            case HELPER:
+                break;
+            case ERROR:
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void processNewMessage(Message message) {
+        switch (message.getMessageType()) {
+            case CONNECT:
+                break;
+            case DISCONNECT:
+                authenticated = false;
+                break;
+            case LOGIN:
+                break;
+            case HELP:
+                System.out.println(message.getContent().toString());
+                break;
+            case HELPER:
+                break;
+            case REGISTER:
+                break;
+            case ERROR:
+                break;
+            default:
+                break;
+        }
+    }
+
     public boolean isConnected() {
         if (clientSocket != null) {
             return clientSocket.isConnected();
@@ -79,5 +172,9 @@ public class ClientModel {
 
     public boolean isInitialized() {
         return initialized;
+    }
+
+    public boolean isAuthenticated() {
+        return authenticated;
     }
 }

@@ -72,6 +72,20 @@ public class DevicesManager extends Manager<DevicesEntry> {
         return entry;
     }
 
+    public DevicesEntry getEntry(String name) throws SQLException {
+        String query = "SELECT id, deviceName, ip, user FROM Devices WHERE deviceName = ?;";
+        PreparedStatement statement = getConnection().prepareStatement(query);
+        statement.setString(1, name);
+        ResultSet data = statement.executeQuery();
+        data.next();
+
+        DevicesEntry entry = DevicesEntry.parseResults(data);
+        data.close();
+        statement.close();
+
+        return entry;
+    }
+
     public boolean updateEntry(DevicesEntry entry) throws SQLException {
         String query = "UPDATE Devices SET deviceName = ?, ip = ?, user = ? WHERE id = ?;";
         PreparedStatement statement = getConnection().prepareStatement(query);

@@ -19,7 +19,7 @@ public class BDPMServer implements Runnable {
     private PoolManager manager;
 
     public BDPMServer(int port, int max_client) throws SQLException {
-        manager = new PoolManager(max_client);
+        PoolManager.getInstance().init(max_client);
         serverPort = port;
     }
 
@@ -36,6 +36,10 @@ public class BDPMServer implements Runnable {
 
             try {
                 clientSocket = (SSLSocket) this.serverSocket.accept();
+                ClientRunnable clientRunnable = new ClientRunnable(clientSocket);
+                PoolManager.getInstance().addClient(clientRunnable);
+                new Thread(clientRunnable).start();
+
             } catch (IOException e) {
                 if (isStopped()) {
                     System.out.println("[*] Server Stopped.");
@@ -43,9 +47,11 @@ public class BDPMServer implements Runnable {
                 }
                 throw new RuntimeException(
                         "[!] Error accepting client connection", e);
+            } catch (SQLException ex){
+                System.out.println("[!] Error while creating client manager");
             }
 
-            new Thread(new ClientRunnable(clientSocket, manager)).start();
+
         }
         System.out.println("[*] Server Stopped.");
     }

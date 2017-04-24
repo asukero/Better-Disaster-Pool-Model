@@ -20,8 +20,13 @@ public class StorageEngine {
         this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.path);
     }
 
-    public void disconnect() throws SQLException {
-        this.connection.close();
+    public void disconnect() {
+        try{
+            this.connection.close();
+        } catch (SQLException ex){
+            System.out.println("[!] Error while closing engine.");
+        }
+
     }
 
     public Connection getConnection() {

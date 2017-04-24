@@ -2,6 +2,7 @@ package controllers;
 
 import model.ClientModel;
 import serializable.MessageType;
+import view.LoginFrame;
 import view.RegisterFrame;
 
 import javax.swing.*;
@@ -52,14 +53,48 @@ public class MFController extends MouseAdapter implements DocumentListener {
                     if (model.isInitialized()) {
                         System.out.println("[*] Requesting Help...");
                         if (model.isConnected()) {
-                            model.sendToServer("HELP", MessageType.HELP);
+                            if (model.isAuthenticated()) {
+                                model.sendToServer("HELP", MessageType.HELP);
+                            } else {
+                                System.out.println("[!] Can't request for help if not log on the server.");
+                            }
+
                         } else {
                             System.out.println("[*] Connection was lost, attempting to connect again");
                             model.connectToServer();
-                            model.sendToServer("HELP", MessageType.HELP);
+                            if (model.isAuthenticated()) {
+                                model.sendToServer("HELP", MessageType.HELP);
+                            } else {
+                                System.out.println("[!] Can't request for help if not log on the server.");
+                            }
                         }
                     } else {
                         System.out.println("[!] Can't request for help if not connected to a server.");
+                    }
+                    break;
+                case "Helper":
+                    if (model.isInitialized()) {
+                        System.out.println("[*] Requesting to wait to help...");
+                        if (model.isConnected()) {
+                            if (model.isAuthenticated()) {
+                                model.sendToServer("HELPER", MessageType.HELPER);
+                                model.waitingToHelp();
+                            } else {
+                                System.out.println("[!] Can't request to help if not log on the server.");
+                            }
+
+                        } else {
+                            System.out.println("[*] Connection was lost, attempting to connect again");
+                            model.connectToServer();
+                            if (model.isAuthenticated()) {
+                                model.sendToServer("HELPER", MessageType.HELPER);
+                                model.waitingToHelp();
+                            } else {
+                                System.out.println("[!] Can't request to help if not log on the server.");
+                            }
+                        }
+                    } else {
+                        System.out.println("[!] Can't request to help if not connected to a server.");
                     }
                     break;
                 case "Register":
@@ -71,6 +106,22 @@ public class MFController extends MouseAdapter implements DocumentListener {
                             rf.getPassword().getDocument().addDocumentListener(rfController);
                             rf.getcPassword().getDocument().addDocumentListener(rfController);
                             rf.getRegisterButton().addMouseListener(rfController);
+                        } else {
+                            System.out.println("[*] Connection was lost, attempting to connect again");
+                            model.connectToServer();
+                        }
+                    } else {
+                        System.out.println("[!] Can't register if not connect to a server!");
+                    }
+                    break;
+                case "Login":
+                    if (model.isInitialized()) {
+                        if (model.isConnected()) {
+                            LoginFrame lf = new LoginFrame();
+                            LFController lfController = new LFController(model);
+                            lf.getNickName().getDocument().addDocumentListener(lfController);
+                            lf.getPassword().getDocument().addDocumentListener(lfController);
+                            lf.getLoginButton().addMouseListener(lfController);
                         } else {
                             System.out.println("[*] Connection was lost, attempting to connect again");
                             model.connectToServer();

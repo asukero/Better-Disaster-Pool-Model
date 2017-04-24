@@ -2,18 +2,23 @@ package serializable;
 
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-public final class Message implements Serializable {
+public class Message implements Serializable {
     private MessageType messageType;
     private Object content;
     private String senderName;
     private InetAddress senderIp;
 
-    public Message(MessageType messageType, Object content, String senderName, InetAddress senderIp) {
+    public Message(MessageType messageType, Object content) {
         this.messageType = messageType;
         this.content = content;
-        this.senderName = senderName;
-        this.senderIp = senderIp;
+        try {
+            this.senderName = InetAddress.getLocalHost().getHostName();
+            this.senderIp = InetAddress.getLocalHost();
+        } catch (UnknownHostException ex) {
+            System.out.println("[!] Error while creating message " + ex.getMessage());
+        }
     }
 
     public MessageType getMessageType() {

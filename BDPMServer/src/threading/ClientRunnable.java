@@ -1,12 +1,16 @@
 package threading;
 
+import pool.ClientManager;
 import pool.PoolManager;
 import serializable.Message;
 import serializable.MessageType;
+import serializable.ReturnMessage;
 
 import javax.net.ssl.SSLSocket;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.sql.SQLException;
 
 /**
 
@@ -14,21 +18,25 @@ import java.io.ObjectOutputStream;
 public class ClientRunnable implements Runnable {
 
     protected SSLSocket clientSocket = null;
-    private PoolManager manager;
+    private ClientManager manager;
+    private ObjectOutputStream outToClient;
+    private ObjectInputStream inFromClient;
+    private boolean toClose;
 
-    public ClientRunnable(SSLSocket clientSocket, PoolManager manager) {
+    public ClientRunnable(SSLSocket clientSocket) throws SQLException {
         this.clientSocket = clientSocket;
-        this.manager = manager;
+        this.manager = new ClientManager();
+
     }
 
     public void run() {
-        boolean toClose = false;
+        toClose = false;
         try {
             clientSocket.setEnabledCipherSuites(clientSocket.getSupportedCipherSuites());
 
 
-            ObjectOutputStream outToClient = new ObjectOutputStream(clientSocket.getOutputStream());
-            ObjectInputStream inFromClient = new ObjectInputStream(clientSocket.getInputStream());
+            outToClient = new ObjectOutputStream(clientSocket.getOutputStream());
+            inFromClient = new ObjectInputStream(clientSocket.getInputStream());
 
             while (!toClose) {
 
@@ -40,7 +48,7 @@ public class ClientRunnable implements Runnable {
                     Message message = (Message) clientObject;
                     objectToSendBack = manager.processMessage(message);
 
-                    if(message.getMessageType() == MessageType.DISCONNECT){
+                    if (message.getMessageType() == MessageType.DISCONNECT) {
                         toClose = true;
                     }
                 }
@@ -58,10 +66,26 @@ public class ClientRunnable implements Runnable {
                     outToClient.flush();
                     inFromClient.close();
                     clientSocket.close();
+                    PoolManager.getInstance().removeClient(this);
                 }
             }
         } catch (Exception e) {
             System.out.println("[!] Error: " + e.toString());
         }
+    }
+
+    public void sendHelpToClient(Message message){
+        if(!toClose){
+            try{
+                outToClient.writeObject(message);
+            }catch (IOException ex){
+                System.out.println("[!] Error while sending help to client");
+            }
+
+        }
+    }
+
+    public ClientManager getManager() {
+        return manager;
     }
 }
