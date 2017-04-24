@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BDPMApp</string>
+    <string name="prompt_port">Port</string>
+    <string name="action_connect">Connect to server</string>
 </resources>

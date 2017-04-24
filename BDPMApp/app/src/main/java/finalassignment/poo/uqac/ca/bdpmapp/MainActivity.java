@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
-import android.content.ContentResolver;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -25,7 +24,17 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.io.IOException;
+
+import javax.net.SocketFactory;
+import javax.net.ssl.HandshakeCompletedListener;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,8 +56,8 @@ public class MainActivity extends Activity implements LoaderCallbacks<Cursor> {
     private UserLoginTask mAuthTask = null;
 
     // UI references.
-    private AutoCompleteTextView mEmailView;
-    private EditText mPasswordView;
+    private AutoCompleteTextView mAddress;
+    private EditText mPort;
     private View mProgressView;
     private View mLoginFormView;
 
@@ -58,11 +67,11 @@ public class MainActivity extends Activity implements LoaderCallbacks<Cursor> {
         setContentView(R.layout.activity_main);
 
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        populateAutoComplete();
+        mAddress = (AutoCompleteTextView) findViewById(R.id.IpAddress);
+//        populateAutoComplete();
 
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        mPort = (EditText) findViewById(R.id.port);
+        mPort.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
@@ -73,8 +82,8 @@ public class MainActivity extends Activity implements LoaderCallbacks<Cursor> {
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
+        Button mConnectToServer = (Button) findViewById(R.id.connect_button);
+        mConnectToServer.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
@@ -101,31 +110,27 @@ public class MainActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
 
         // Reset errors.
-        mEmailView.setError(null);
-        mPasswordView.setError(null);
-
-        // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        mAddress.setError(null);
+        mPort.setError(null);
 
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
+        // Store values at the time of the login attempt.
+        String address = mAddress.getText().toString();
+        String port = mPort.getText().toString();
+
+        // Check for a valid port, if the user entered one.
+        if (TextUtils.isEmpty(port)) {
+            mPort.setError(getString(R.string.error_field_required));
+            focusView = mPort;
             cancel = true;
         }
 
-        // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
+        // Check for a valid address.
+        if (TextUtils.isEmpty(address)) {
+            mAddress.setError(getString(R.string.error_field_required));
+            focusView = mAddress;
             cancel = true;
         }
 
@@ -134,11 +139,22 @@ public class MainActivity extends Activity implements LoaderCallbacks<Cursor> {
             // form field with an error.
             focusView.requestFocus();
         } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            try {
+                //InetAddress inetAddress = InetAddress.getByName(address);
+
+                // Show a progress spinner, and kick off a background task to
+                // perform the user login attempt.
+                showProgress(true);
+
+                int portNumber = Integer.parseInt(port);
+//                Socket socket = new Socket(inetAddress, portNumber);
+
+                SSLSocketFactory sf = (SSLSocketFactory)SSLSocketFactory.getDefault();
+                SSLSocket socket = (SSLSocket) sf.createSocket(address, portNumber);
+                socket.setKeepAlive(true);
+            } catch (IOException io) {
+                io.printStackTrace();
+            }
         }
     }
 
@@ -239,7 +255,7 @@ public class MainActivity extends Activity implements LoaderCallbacks<Cursor> {
                 new ArrayAdapter<String>(MainActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
-        mEmailView.setAdapter(adapter);
+        mAddress.setAdapter(adapter);
     }
 
     /**
@@ -287,8 +303,8 @@ public class MainActivity extends Activity implements LoaderCallbacks<Cursor> {
             if (success) {
                 finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                mPort.setError(getString(R.string.error_incorrect_password));
+                mPort.requestFocus();
             }
         }
 
