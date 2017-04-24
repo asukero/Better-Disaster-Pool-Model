@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -34,9 +35,12 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * A login screen that offers login via email/password.
@@ -65,6 +69,9 @@ public class MainActivity extends Activity implements LoaderCallbacks<Cursor> {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+//        System.setProperty("javax.net.ssl.keyStore", "Certif/mySrvKeystore.jks");
+//        System.setProperty("javax.net.ssl.keyStorePassword", "cir58ftw");
 
         // Set up the login form.
         mAddress = (AutoCompleteTextView) findViewById(R.id.IpAddress);
@@ -140,20 +147,14 @@ public class MainActivity extends Activity implements LoaderCallbacks<Cursor> {
             focusView.requestFocus();
         } else {
             try {
-                //InetAddress inetAddress = InetAddress.getByName(address);
-
-                // Show a progress spinner, and kick off a background task to
-                // perform the user login attempt.
-                showProgress(true);
-
-                int portNumber = Integer.parseInt(port);
-//                Socket socket = new Socket(inetAddress, portNumber);
-
-                SSLSocketFactory sf = (SSLSocketFactory)SSLSocketFactory.getDefault();
-                SSLSocket socket = (SSLSocket) sf.createSocket(address, portNumber);
+                Socket socket = new AsyncConnector().execute(address, port).get();
                 socket.setKeepAlive(true);
-            } catch (IOException io) {
-                io.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (SocketException e) {
+                e.printStackTrace();
             }
         }
     }
