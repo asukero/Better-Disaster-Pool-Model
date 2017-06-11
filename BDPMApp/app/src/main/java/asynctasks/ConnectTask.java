@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 
 import javax.net.ssl.SSLSocket;
 
+import finalassignment.poo.uqac.ca.bdpmapp.MainActivity;
 import finalassignment.poo.uqac.ca.bdpmapp.R;
 import model.ClientModel;
 import serializable.MessageType;
@@ -22,15 +23,16 @@ public class ConnectTask extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... voids) {
         try {
             System.out.println("[*] Connecting to " + model.serverHostName.toString() + ":" + model.portNumber + "...");
-            model.clientSocket = (SSLSocket) SSLSocketKeystoreFactory.getSocketWithCert(model.serverHostName, model.portNumber, model.context.getResources().openRawResource(R.raw.keystore), "SrvKeypass");
+            model.clientSocket = (SSLSocket) SSLSocketKeystoreFactory.getSocketWithCert(model.serverHostName, model.portNumber, model.context.getResources().openRawResource(R.raw.mysrvkeystore), "cir58ftw");
             model.clientSocket.setKeepAlive(true);
 
             model.outToServer = new ObjectOutputStream(model.clientSocket.getOutputStream());
             model.inFromServer = new ObjectInputStream(model.clientSocket.getInputStream());
             model.sendToServer("CONNECT", MessageType.CONNECT);
+
             }
         catch (Exception ex) {
-            //Log.ERROR("[!] Error couldn't establish a connection with " + model.serverHostName.toString() + ":" + model.portNumber);
+            //context.errorText.setText("[!] Error couldn't establish a connection with " + model.serverHostName.toString() + ":" + model.portNumber);
         }
         return null;
     }

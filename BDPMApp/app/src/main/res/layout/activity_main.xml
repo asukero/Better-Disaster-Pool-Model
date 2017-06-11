@@ -7,24 +7,20 @@
     android:paddingTop="@dimen/activity_vertical_margin" tools:context=".MainActivity">
 
     <!-- Login progress -->
-    <ProgressBar android:id="@+id/login_progress" style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp" android:visibility="gone" />
 
     <LinearLayout
-        android:id="@+id/email_login_form"
+        android:id="@+id/server_login_form"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <AutoCompleteTextView
+        <EditText
             android:id="@+id/server"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:ems="10"
             android:hint="@string/prompt_server"
-            android:inputType="textEmailAddress"
-            android:maxLines="1"
-            android:singleLine="true" />
+            android:inputType="text" />
 
         <EditText
             android:id="@+id/port"
@@ -33,7 +29,7 @@
             android:hint="@string/prompt_port"
             android:imeActionId="@+id/login_button"
             android:imeOptions="actionUnspecified"
-            android:inputType="text"
+            android:inputType="number"
             android:maxLines="1"
             android:singleLine="true" />
 
@@ -48,35 +44,95 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/login_button"
+    <LinearLayout
+        android:id="@+id/login_interface"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Login" />
+        android:orientation="vertical"
+        android:visibility="gone">
 
-    <Button
-        android:id="@+id/register_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Register" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-    <Button
-        android:id="@+id/help_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Help" />
+            <EditText
+                android:id="@+id/pseudo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:hint="pseudo"
+                android:inputType="textPersonName" />
 
-    <Button
-        android:id="@+id/helper_button"
+            <EditText
+                android:id="@+id/password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:hint="password"
+                android:inputType="textPassword" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/register_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Register" />
+
+            <Button
+                android:id="@+id/login_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Login" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/help_interface"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Helper" />
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:weightSum="1">
+
+        <Button
+            android:id="@+id/help_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.99"
+            android:text="Help" />
+
+        <Button
+            android:id="@+id/helper_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Helper" />
+
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/disconnect_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Disconnect" />
+        android:text="Disconnect"
+        android:visibility="gone" />
 
+    <TextView
+        android:id="@+id/error_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/black" />
 </LinearLayout>
 

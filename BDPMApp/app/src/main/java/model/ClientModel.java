@@ -1,6 +1,7 @@
 package model;
 
 import android.content.Context;
+import android.view.View;
 
 import asynctasks.ConnectTask;
 import asynctasks.DisconnectTask;
@@ -8,6 +9,8 @@ import asynctasks.HelpTask;
 import asynctasks.HelperTask;
 import asynctasks.LoginTask;
 import asynctasks.RegisterTask;
+import finalassignment.poo.uqac.ca.bdpmapp.MainActivity;
+import finalassignment.poo.uqac.ca.bdpmapp.R;
 import serializable.Message;
 import serializable.MessageType;
 import serializable.ReturnMessage;
@@ -18,6 +21,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
+
+import static com.google.android.gms.internal.zzid.runOnUiThread;
 
 /**
  * Logique interne de l'application cliente, réalise tous les appels vers le serveur
@@ -34,10 +39,10 @@ public class ClientModel  {
     public Thread waitingToHelpThread = new Thread();
     public boolean initialized = false;
     public boolean authenticated = false;
-    public Context context;
+    public MainActivity context;
     public MessageType messageType=null;
 
-    public void initialize(InetAddress inetAddress, int port,Context context) {
+    public void initialize(InetAddress inetAddress, int port,MainActivity context) {
         serverHostName = inetAddress;
         portNumber = port;
         initialized = true;
@@ -116,7 +121,13 @@ public class ClientModel  {
                 @Override
                 public void run() {
                     boolean helpReceived = false;
-                    System.out.println("[*] Waiting to help...");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            context.errorText.setText("[*] Waiting to help...");
+                        }
+                    });
+
                     try{
                         while (!helpReceived){
                             Object response = inFromServer.readObject();
@@ -127,7 +138,14 @@ public class ClientModel  {
                             }
                         }
                     } catch (IOException | ClassNotFoundException ex) {
-                        System.out.println("[!] Error while waiting for help: " + ex.getMessage());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                context.errorText.setText("[!] Error while waiting for help: " + ex.getMessage());
+
+                            }
+                        });
+
                     }
 
                 }
@@ -149,7 +167,7 @@ public class ClientModel  {
             clientSocket.close();
             initialized = false;
         } catch (IOException ex) {
-            System.out.println("[!] Error while closing the socket");
+            context.errorText.setText("[!] Error while closing the socket");
         }
     }
 
@@ -159,20 +177,37 @@ public class ClientModel  {
      */
     private void processReturnMessage(ReturnMessage rMessage) {
         if (rMessage.isSuccess()) {
-            System.out.println("[*] Success!");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    context.errorText.setText("[*] Success!");
+                }
+            });
+
         } else {
-            System.out.println("[!] Error!");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    context.errorText.setText("[*] Error!");
+                }
+            });
         }
         System.out.println(rMessage.getContent().toString());
         switch (rMessage.getMessageType()) {
-            case CONNECT:
+            case CONNECT:{
+                ((MainActivity)context).connectionComplete();
                 break;
-            case DISCONNECT:
+                }
+
+            case DISCONNECT: {
                 authenticated = false;
+                ((MainActivity)context).disconnectionComplete();
                 break;
+                }
             case LOGIN:
                 if (rMessage.isSuccess()) {
                     authenticated = true;
+                    ((MainActivity)context).loginComplete();
                 }
                 break;
             case REGISTER:
@@ -197,7 +232,7 @@ public class ClientModel  {
      * ce client)
      * @param message
      */
-    private void processNewMessage(Message message) {
+    private void processNewMessage(final Message message) {
         switch (message.getMessageType()) {
             case CONNECT:
                 break;
@@ -207,7 +242,13 @@ public class ClientModel  {
             case LOGIN:
                 break;
             case HELP:
-                System.out.println(message.getContent().toString());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        context.errorText.setText(message.getContent().toString());
+                    }
+                });
+
                 break;
             case HELPER:
                 break;

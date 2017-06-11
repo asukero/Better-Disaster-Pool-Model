@@ -28,29 +28,15 @@ public class MainActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     private ClientModel clientModel;
     public boolean responded=false;
+    public TextView errorText;
 
-    private EditText mPortView;
-    private View mServerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         // Set up the login form.
-        mServerView = (AutoCompleteTextView) findViewById(R.id.server);
-
-        mPortView = (EditText) findViewById(R.id.port);
-        mPortView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login_button || id == EditorInfo.IME_NULL) {
-                    return true;
-                }
-                return false;
-            }
-        });
-
+        errorText=(TextView) findViewById(R.id.error_view);
         Button ConnectButton = (Button) findViewById(R.id.connect_button);
         ConnectButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -95,19 +81,60 @@ public class MainActivity extends Activity implements LoaderCallbacks<Cursor> {
         DisconnectButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptHelper();
+                attemptDisconnect();
             }
         });
 
     }
+    public void connectionComplete(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                findViewById(R.id.disconnect_button).setVisibility(View.VISIBLE);
+                findViewById(R.id.login_interface).setVisibility(View.VISIBLE);
+                findViewById(R.id.server_login_form).setVisibility(View.GONE);
+
+            }
+        });
+
+
+    }
+
+    public void disconnectionComplete(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+        findViewById(R.id.server_login_form).setVisibility(View.VISIBLE);
+        findViewById(R.id.disconnect_button).setVisibility(View.GONE);
+        findViewById(R.id.login_interface).setVisibility(View.GONE);
+        findViewById(R.id.help_interface).setVisibility(View.GONE);
+            }
+        });
+    }
+
+    public void loginComplete(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+        findViewById(R.id.server_login_form).setVisibility(View.GONE);
+        findViewById(R.id.disconnect_button).setVisibility(View.VISIBLE);
+        findViewById(R.id.login_interface).setVisibility(View.VISIBLE);
+        findViewById(R.id.help_interface).setVisibility(View.VISIBLE);
+        }
+    });
+    }
+
 
     private void attemptConnect() {
+        errorText.setText("");
         clientModel=new ClientModel();
         try {
-            clientModel.initialize(InetAddress.getByName("192.168.1.100"),4242,this);
+            String ip= ((EditText)findViewById(R.id.server)).getText().toString();
+            int port=Integer.parseInt(((EditText)findViewById(R.id.port)).getText().toString());
+            clientModel.initialize(InetAddress.getByName(ip),port,this);
             clientModel.connect();
         } catch (Exception ex) {
-            System.out.println("[!] Ip address or port are not valid");
+            errorText.setText("[!] Ip address or port are not valid");
         }
     }
 
@@ -120,12 +147,16 @@ public class MainActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     private void attemptRegister() {
         if (clientModel!=null){
-            clientModel.register("pass","pass");
+            String pseudo= ((EditText)findViewById(R.id.pseudo)).getText().toString();
+            String pass=(((EditText)findViewById(R.id.password)).getText().toString());
+            clientModel.register(pseudo,pass);
         }
     }
     private void attemptLogin() {
         if (clientModel!=null){
-            clientModel.login("pass","pass");
+            String pseudo= ((EditText)findViewById(R.id.pseudo)).getText().toString();
+            String pass=(((EditText)findViewById(R.id.password)).getText().toString());
+            clientModel.login(pseudo,pass);
         }
     }
     private void attemptHelp() {
